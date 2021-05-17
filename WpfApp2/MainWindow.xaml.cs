@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
@@ -64,6 +68,12 @@ namespace WpfApp2
             }
         }
 
+        ////this for binding maybe
+        //private void show_last()
+        //{
+
+        //}
+
         private void select(Shape shape)
         {
             DropShadowEffect glow = new DropShadowEffect();
@@ -77,13 +87,8 @@ namespace WpfApp2
 
             Delete.IsEnabled = true;
             RandomColor.IsEnabled = true;
-        }
 
-        private void deselect(Shape shape)
-        {
-            selected.Remove(shape);
-            Panel.SetZIndex(shape, 0);
-            shape.Effect = null;
+            //when selected binding on the last ;(((
         }
 
         private void canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -94,7 +99,9 @@ namespace WpfApp2
 
                 if (selected.Contains(shape)) //if this object is already selected then deselect it
                 {
-                    deselect(shape);
+                    Panel.SetZIndex(shape, 0);
+                    shape.Effect = null;
+                    
                     Delete.IsEnabled = false;
                     RandomColor.IsEnabled = false;
                 }
@@ -116,17 +123,21 @@ namespace WpfApp2
                 else //if it wasnt selected - deselect all and select only this 
                 {
                     foreach (var s in selected)
-                        deselect(s);
+                    {
+                        Panel.SetZIndex(s, 0);
+                        s.Effect = null;
+                    }
+                    selected.Clear();
 
                     select(shape);
                 }
             }
             else //all the selected shapes are deselected when click on canvas 
             {
-                foreach (var shape in selected)
+                foreach (var s in selected)
                 {
-                    Panel.SetZIndex(shape, 0);
-                    shape.Effect = null;
+                    Panel.SetZIndex(s, 0);
+                    s.Effect = null;
                 }
                 selected.Clear();
 
@@ -232,7 +243,7 @@ namespace WpfApp2
             canvas.ReleaseMouseCapture();
             canvas.Cursor = Cursors.Arrow;
             drawing_elips = false;
-            drawing_rect = false;            
+            drawing_rect = false;
         }
 
         public static void SaveCanvasToFile(Window window, Canvas canvas, int dpi, string filename)

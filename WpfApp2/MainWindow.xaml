@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:WpfApp2"
         mc:Ignorable="d"
         Title="Mini Paint"
+        Icon="Paint.ico"
         FontSize="16"
         MinHeight="250" MinWidth="950"
         WindowState="Maximized"
@@ -14,16 +15,15 @@
     <Window.Resources>
         <Style x:Key="labelStyle" TargetType="Label">
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Height" Value="20"/>
+            <Setter Property="Height" Value="25"/>
             <Setter Property="Width" Value="50"/>
-            <Setter Property="HorizontalAlignment" Value="Left" />
-            <Setter Property="VerticalAlignment" Value="Top"/>
         </Style>
 
         <Style x:Key="textboxStyle" TargetType="TextBox">
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Height" Value="20"/>
-            <Setter Property="Width" Value="80"/>
+            <Setter Property="Width" Value="110"/>
+            <Setter Property="Margin" Value="1"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="VerticalAlignment" Value="Top"/>
@@ -48,11 +48,11 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="90"/>
+            <RowDefinition Height="100"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row ="0" Background="LightGray" Grid.ColumnSpan="2" Margin="0,0,0.333,0" >
+        <DockPanel Grid.Row ="0" Background="LightGray" Grid.ColumnSpan="2" Margin="0,0,0.333,0" Panel.ZIndex="1" >
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="450"/>
@@ -62,22 +62,30 @@
 
                 <DockPanel Grid.Column="0">
                     <Button Name="DrawRectangle" Content="Rectangle"  Width="100" Height="50" Click="DrawRectangle_Click" Margin="5" />
-                    <Button Name="DrawEllipse" Content="Ellipse"  Width="100" Height="50" Click="DrawEllipse_Click" Margin="10"/>
+                    <Button Name="DrawEllipse" Content="Ellipse"  Width="100" Height="50" Click="DrawEllipse_Click" Margin="5"/>
 
-                    <StackPanel>
-                        <Label Content="Width: " Style="{StaticResource labelStyle}"/>
-                        <Label Content="Height: " Style="{StaticResource labelStyle}"/>
-                        <Label Content="Color: "  Style="{StaticResource labelStyle}"/>
-                        <Label Content="Angle: " Style="{StaticResource labelStyle}"/>
+                    <StackPanel Margin="1" >
+                        <DockPanel>
+                            <Label Content="Width: "  Style="{StaticResource labelStyle}" />
+                            <TextBox Name="WidthText"  Style="{StaticResource textboxStyle}" />
+                        </DockPanel>
+
+                        <DockPanel>
+                            <Label Content="Height: " Style="{StaticResource labelStyle}"/>
+                            <TextBox Name="HeightText" Style="{StaticResource textboxStyle}"/>
+                        </DockPanel>
+
+                        <DockPanel>
+                            <Label Content="Color: "  Style="{StaticResource labelStyle}"/>
+                            <ComboBox Name="ColorsBox" Height="20" Width="110"/>
+                        </DockPanel>
+
+                        <DockPanel>
+                            <Label Content="Angle: "  Style="{StaticResource labelStyle}"/>
+                            <Slider Name="AngleSlider" Height="20" Width="110" /> 
+                        </DockPanel>
                     </StackPanel>
 
-                    <StackPanel>
-                        <TextBox Style="{StaticResource textboxStyle}"/>
-                        <TextBox Style="{StaticResource textboxStyle}"/>
-                        <TextBox Style="{StaticResource textboxStyle}"/>
-                        <TextBox Style="{StaticResource textboxStyle}"/>
-                    </StackPanel>
-                    
                     <Separator Style="{DynamicResource VerticalSeparatorStyle}" />
                 </DockPanel>
 
@@ -91,7 +99,7 @@
                     <Button Name="ExportPNG" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="50" Click="ExportPNG_Click" Margin="10">
                         <TextBlock TextWrapping="Wrap" Text="Export to .png" TextAlignment="Center" />
                     </Button>
-                    <Button Name ="ChangeLanugage" Width="60" Height="40"  RenderTransformOrigin="0.19,0.042" />
+                    <Button Name ="ChangeLanugage" Width="60" Height="40"  RenderTransformOrigin="0.19,0.042"  />
                 </DockPanel>
             </Grid>
         </DockPanel>
