@@ -108,6 +108,12 @@ namespace WpfApp2
                     Panel.SetZIndex(shape, 0);
                     shape.Effect = null;
                     selected.Remove(shape);
+
+                    if(selected.Count == 0)
+                    {
+                        Delete.IsEnabled = false;
+                        RandomColor.IsEnabled = false;
+                    }
                 }
                 else //if it wasnt selected then select it 
                 {
@@ -271,9 +277,13 @@ namespace WpfApp2
             drawing_elips = false;
             drawing_rect = false;
 
-            Mouse.Capture(null);
-            captured = false;
-            moving = null;
+            if (captured)
+            {
+                Mouse.Capture(null);
+                captured = false;
+                moving.Cursor = Cursors.Hand;
+                moving = null;
+            }          
         }
 
         public static void SaveCanvasToFile(Window window, Canvas canvas, int dpi, string filename)
