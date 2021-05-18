@@ -53,7 +53,7 @@ namespace WpfApp2
                 rect.Cursor = Cursors.Hand;
             }
 
-            for (int i = 0; i < (6 - x); i++)
+            for (int i = 0; i < (4 - x); i++)
             {
                 Ellipse elips = new Ellipse();
                 elips.Width = rnd.Next(50, 300);
@@ -76,19 +76,25 @@ namespace WpfApp2
 
         private void select(Shape shape)
         {
-            DropShadowEffect glow = new DropShadowEffect();
-            glow.Color = Colors.White;
-            glow.BlurRadius = 50;
-            glow.Direction = 270;
+            if (!drawing_rect && !drawing_elips)
+            {
+                DropShadowEffect glow = new DropShadowEffect();
+                glow.Color = Colors.White;
+                glow.BlurRadius = 50;
+                glow.Direction = 270;
 
-            selected.Add(shape);
-            Panel.SetZIndex(shape, 1);
-            shape.Effect = glow;
+                selected.Add(shape);
+                Panel.SetZIndex(shape, 1);
+                shape.Effect = glow;
 
-            Delete.IsEnabled = true;
-            RandomColor.IsEnabled = true;
+                Delete.IsEnabled = true;
+                RandomColor.IsEnabled = true;
 
-            //when selected binding on the last ;(((
+                //when selected binding on the last ;(((
+                var last = selected.Last();
+                WidthText.Text = $"{last.Width}";
+                HeightText.Text = $"{last.Height}";
+            }   
         }
 
         private void canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -101,12 +107,12 @@ namespace WpfApp2
                 {
                     Panel.SetZIndex(shape, 0);
                     shape.Effect = null;
-                    
-                    Delete.IsEnabled = false;
-                    RandomColor.IsEnabled = false;
+                    selected.Remove(shape);
                 }
-                else //if it wasnt selected then select it                
+                else //if it wasnt selected then select it 
+                {
                     select(shape);
+                }                
             }
         }
 
@@ -114,13 +120,8 @@ namespace WpfApp2
         {
             if (e.OriginalSource is Shape)
             {
-                var shape = (Shape)e.OriginalSource;
-
-                if (selected.Contains(shape))
-                {
-                    //something about moving shapes
-                }
-                else //if it wasnt selected - deselect all and select only this 
+                var shape = (Shape)e.OriginalSource;             
+                if (!selected.Contains(shape)) //if it wasnt selected - deselect all and select only this 
                 {
                     foreach (var s in selected)
                     {
@@ -182,6 +183,10 @@ namespace WpfApp2
             rect = new Rectangle();
         }
 
+        bool captured = false;
+        double x_shape, x_canvas, y_shape, y_canvas;
+        Shape moving = null;
+
         private void canvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (drawing_rect)
@@ -200,10 +205,34 @@ namespace WpfApp2
                 canvas.Children.Add(elips);
                 shapes.Add(elips);
             }
+            else if(e.OriginalSource is Shape) //moving all selected shapes
+            {
+                moving = (Shape)e.OriginalSource;
+                moving.Cursor = Cursors.ScrollAll;
+                Mouse.Capture(moving);
+                captured = true;
+                x_shape = Canvas.GetLeft(moving);
+                x_canvas = e.GetPosition(canvas).X;
+                y_shape = Canvas.GetTop(moving);
+                y_canvas = e.GetPosition(canvas).Y;
+            }
         }
 
         private void canvas_MouseMove(object sender, MouseEventArgs e)
         {
+            if (captured)
+            {
+                moving.Cursor = Cursors.ScrollAll;
+                double x = e.GetPosition(canvas).X;
+                double y = e.GetPosition(canvas).Y;
+                x_shape += x - x_canvas;
+                Canvas.SetLeft(moving, x_shape);
+                x_canvas = x;
+                y_shape += y - y_canvas;
+                Canvas.SetTop(moving, y_shape);
+                y_canvas = y;
+            }
+
             if (!canvas.IsMouseCaptured)
                 return;
 
@@ -214,13 +243,13 @@ namespace WpfApp2
             double maxX = Math.Max(location.X, anchorPoint.X);
             double maxY = Math.Max(location.Y, anchorPoint.Y);
 
+            double height = maxY - minY;
+            double width = maxX - minX;
+
             if (drawing_rect)
             {
                 Canvas.SetTop(rect, minY);
                 Canvas.SetLeft(rect, minX);
-
-                double height = maxY - minY;
-                double width = maxX - minX;
 
                 rect.Height = Math.Abs(height);
                 rect.Width = Math.Abs(width);
@@ -229,9 +258,6 @@ namespace WpfApp2
             {
                 Canvas.SetTop(elips, minY);
                 Canvas.SetLeft(elips, minX);
-
-                double height = maxY - minY;
-                double width = maxX - minX;
 
                 elips.Height = Math.Abs(height);
                 elips.Width = Math.Abs(width);
@@ -244,6 +270,10 @@ namespace WpfApp2
             canvas.Cursor = Cursors.Arrow;
             drawing_elips = false;
             drawing_rect = false;
+
+            Mouse.Capture(null);
+            captured = false;
+            moving = null;
         }
 
         public static void SaveCanvasToFile(Window window, Canvas canvas, int dpi, string filename)
@@ -257,7 +287,7 @@ namespace WpfApp2
             var enc = new PngBitmapEncoder();
             enc.Frames.Add(BitmapFrame.Create(rtb));
 
-            using (var stm = System.IO.File.Create(filename))
+            using (var stm = File.Create(filename))
             {
                 enc.Save(stm);
             }
@@ -276,6 +306,24 @@ namespace WpfApp2
                 string filename = dlg.FileName;
                 SaveCanvasToFile(this, canvas, 96, filename);
             }
+        }
+
+        //only the last one selected has to rotate from -180 to 180
+        private void AngleSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (selected.Count != 0)
+            {
+                var tr_rotate = new RotateTransform(0);
+                var tr_group = new TransformGroup();
+                tr_group.Children.Add(tr_rotate);
+
+                var last = selected.Last();
+
+                last.RenderTransform = tr_group;
+                tr_rotate.Angle = AngleSlider.Value;
+                tr_rotate.CenterX = last.Width / 2;
+                tr_rotate.CenterY = last.Height / 2;
+            }      
         }
     }
 }

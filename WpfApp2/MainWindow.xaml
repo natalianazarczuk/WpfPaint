@@ -71,18 +71,19 @@
                         </DockPanel>
 
                         <DockPanel>
-                            <Label Content="Height: " Style="{StaticResource labelStyle}"/>
+                            <Label Content="Height: " Style="{StaticResource labelStyle}" />
                             <TextBox Name="HeightText" Style="{StaticResource textboxStyle}"/>
                         </DockPanel>
 
                         <DockPanel>
-                            <Label Content="Color: "  Style="{StaticResource labelStyle}"/>
+                            <Label Content="Color: "  Style="{StaticResource labelStyle}" Width="37" />
                             <ComboBox Name="ColorsBox" Height="20" Width="110"/>
                         </DockPanel>
 
                         <DockPanel>
-                            <Label Content="Angle: "  Style="{StaticResource labelStyle}"/>
-                            <Slider Name="AngleSlider" Height="20" Width="110" /> 
+                            <Label Content="Angle: "  Style="{StaticResource labelStyle}" Width="44"/>
+                            <TextBox Text="{Binding ElementName=AngleSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" Height="20" Background="LightGray" TextAlignment="Center" FontSize="10"  Width="19" />
+                            <Slider Name="AngleSlider" Height="20" Width="110" ValueChanged="AngleSlider_ValueChanged" Minimum="-180" Maximum="180"/> 
                         </DockPanel>
                     </StackPanel>
 
