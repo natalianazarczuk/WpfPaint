@@ -69,12 +69,12 @@
                     <StackPanel Margin="1" >
                         <DockPanel HorizontalAlignment="Right">
                             <TextBlock Text="Width: "  Style="{StaticResource labelStyle}" />
-                            <TextBox Name="WidthText"  Style="{StaticResource textboxStyle}" />
+                            <TextBox Name="WidthText"  Style="{StaticResource textboxStyle}" TextChanged="WidthText_TextChanged"/>
                         </DockPanel>
 
                         <DockPanel HorizontalAlignment="Right">
                             <TextBlock Text="Height: " Style="{StaticResource labelStyle}" />
-                            <TextBox Name="HeightText" Style="{StaticResource textboxStyle}"/>
+                            <TextBox Name="HeightText" Style="{StaticResource textboxStyle}" TextChanged="HeightText_TextChanged"/>
                         </DockPanel>
 
                         <DockPanel HorizontalAlignment="Right">
@@ -83,7 +83,7 @@
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Name="colornames" Text="{Binding Name}" FontSize="12" Width="110" Height="20"
+                                            <TextBlock Name="colornames" Text="{Binding Name}" FontSize="12" Width="110" Height="20" Loaded="colornames_Loaded"
                                                        TextAlignment="Center" Background="{Binding Rgb, Converter={StaticResource colorsTobrush}}"/>
                                         </StackPanel>
                                     </DataTemplate>

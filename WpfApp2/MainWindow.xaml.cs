@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -70,23 +71,34 @@ namespace WpfApp2
             var props = typeof(Colors).GetProperties(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
             var colorInfos = props.Select(prop =>
             {
-                var color = (Color)prop.GetValue(null, null);
+                var color = (Color)prop.GetValue(null, null);                
                 return new ColorInfo()
-                {
-                    Name = prop.Name,
-                    Rgb = color,
+                {                    
+                    Name = prop.Name, 
+                    Rgb = color,                    
                     RgbInfo = $"R:{color.R}, G:{color.G}, B:{color.B}"
                 };
-            });
+            });         
 
-            DataContext = colorInfos;
+            DataContext = colorInfos;            
+
+            WidthText.IsEnabled = false;
+            HeightText.IsEnabled = false;
+            ColorsBox.IsEnabled = false;
         }
 
-        ////this for binding maybe
-        //private void show_last()
-        //{
-
-        //}
+        private static int Brightness(Color c)
+        {
+            return (int)Math.Sqrt(
+                c.R * c.R * .241 +
+                c.G * c.G * .691 +
+                c.B * c.B * .068);
+        }
+        private void colornames_Loaded(object sender, RoutedEventArgs e)
+        {
+            var colors = sender as TextBlock;
+            colors.Foreground = Brightness(((SolidColorBrush)colors.Background).Color) > 130 ? Brushes.Black : Brushes.White;
+        }
 
         private void select(Shape shape)
         {
@@ -105,10 +117,35 @@ namespace WpfApp2
                 RandomColor.IsEnabled = true;
 
                 //when selected binding on the last ;(((
+                WidthText.IsEnabled = true;
+                HeightText.IsEnabled = true;
+                ColorsBox.IsEnabled = true;
+
                 var last = selected.Last();
                 WidthText.Text = $"{last.Width}";
                 HeightText.Text = $"{last.Height}";
             }   
+        }
+
+        private void WidthText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var last = selected.Last();
+            last.Width = Math.Abs(double.Parse(WidthText.Text));
+        }
+
+        private void HeightText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var last = selected.Last();
+            last.Height = Math.Abs(double.Parse(HeightText.Text));
+        }
+        private void ColorsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (selected.Count != 0)
+            {
+                var last = selected.Last();
+                var comboItem = (ColorInfo)ColorsBox.SelectedItem;
+                last.Fill = new SolidColorBrush(Color.FromRgb(comboItem.Rgb.R, comboItem.Rgb.G, comboItem.Rgb.B));
+            }
         }
 
         private void canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -132,6 +169,10 @@ namespace WpfApp2
                     }
                     else
                     {
+                        WidthText.IsEnabled = false;
+                        HeightText.IsEnabled = false;
+                        ColorsBox.IsEnabled = false;
+                        
                         Delete.IsEnabled = false;
                         RandomColor.IsEnabled = false;
                     }
@@ -170,6 +211,10 @@ namespace WpfApp2
                 }
                 selected.Clear();
 
+                WidthText.IsEnabled = false;
+                HeightText.IsEnabled = false;
+                ColorsBox.IsEnabled = false;
+
                 Delete.IsEnabled = false;
                 RandomColor.IsEnabled = false;
             }
@@ -201,6 +246,20 @@ namespace WpfApp2
             drawing_elips = true;
             canvas.Cursor = Cursors.Cross;
             elips = new Ellipse();
+
+            WidthText.IsEnabled = false;
+            HeightText.IsEnabled = false;
+            ColorsBox.IsEnabled = false;
+
+            Delete.IsEnabled = false;
+            RandomColor.IsEnabled = false;
+
+            foreach (var s in selected)
+            {
+                Panel.SetZIndex(s, 0);
+                s.Effect = null;
+            }
+            selected.Clear();
         }
 
         private void DrawRectangle_Click(object sender, RoutedEventArgs e)
@@ -209,10 +268,24 @@ namespace WpfApp2
             drawing_rect = true;
             canvas.Cursor = Cursors.Cross;
             rect = new Rectangle();
+
+            WidthText.IsEnabled = false;
+            HeightText.IsEnabled = false;
+            ColorsBox.IsEnabled = false;
+
+            Delete.IsEnabled = false;
+            RandomColor.IsEnabled = false;
+
+            foreach (var s in selected)
+            {
+                Panel.SetZIndex(s, 0);
+                s.Effect = null;
+            }
+            selected.Clear();
         }
 
         bool captured = false;
-        double x_shape, x_canvas, y_shape, y_canvas;
+        double x_shape, y_shape, x_canvas, y_canvas;
         Shape moving = null;
 
         private void canvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -236,12 +309,13 @@ namespace WpfApp2
             else if(e.OriginalSource is Shape) //moving all selected shapes
             {
                 moving = (Shape)e.OriginalSource;
-                moving.Cursor = Cursors.ScrollAll;
                 Mouse.Capture(moving);
                 captured = true;
+                moving.Cursor = Cursors.ScrollAll;
+
                 x_shape = Canvas.GetLeft(moving);
-                x_canvas = e.GetPosition(canvas).X;
                 y_shape = Canvas.GetTop(moving);
+                x_canvas = e.GetPosition(canvas).X;
                 y_canvas = e.GetPosition(canvas).Y;
             }
         }
@@ -249,16 +323,13 @@ namespace WpfApp2
         private void canvas_MouseMove(object sender, MouseEventArgs e)
         {
             if (captured)
-            {
-                moving.Cursor = Cursors.ScrollAll;
-                double x = e.GetPosition(canvas).X;
-                double y = e.GetPosition(canvas).Y;
-                x_shape += x - x_canvas;
+            {            
+                x_shape += e.GetPosition(canvas).X - x_canvas;
                 Canvas.SetLeft(moving, x_shape);
-                x_canvas = x;
-                y_shape += y - y_canvas;
+                x_canvas = e.GetPosition(canvas).X;
+                y_shape += e.GetPosition(canvas).Y - y_canvas;
                 Canvas.SetTop(moving, y_shape);
-                y_canvas = y;
+                y_canvas = e.GetPosition(canvas).Y;
             }
 
             if (!canvas.IsMouseCaptured)
@@ -308,6 +379,7 @@ namespace WpfApp2
             }          
         }
 
+
         public static void SaveCanvasToFile(Window window, Canvas canvas, int dpi, string filename)
         {
             Size size = new Size(window.Width, window.Height);
@@ -324,7 +396,6 @@ namespace WpfApp2
                 enc.Save(stm);
             }
         }
-
 
         private void ExportPNG_Click(object sender, RoutedEventArgs e)
         {
@@ -358,17 +429,6 @@ namespace WpfApp2
                 tr_rotate.CenterY = last.Height / 2;
             }      
         }
-
-        private void ColorsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (selected.Count != 0)
-            {
-                var last = selected.Last();
-                var comboItem = (ColorInfo)ColorsBox.SelectedItem;
-                last.Fill = new SolidColorBrush(Color.FromRgb(comboItem.Rgb.R, comboItem.Rgb.G, comboItem.Rgb.B));
-            }
-        }
-
 
 
 
