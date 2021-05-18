@@ -66,6 +66,20 @@ namespace WpfApp2
 
                 elips.Cursor = Cursors.Hand;
             }
+
+            var props = typeof(Colors).GetProperties(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+            var colorInfos = props.Select(prop =>
+            {
+                var color = (Color)prop.GetValue(null, null);
+                return new ColorInfo()
+                {
+                    Name = prop.Name,
+                    Rgb = color,
+                    RgbInfo = $"R:{color.R}, G:{color.G}, B:{color.B}"
+                };
+            });
+
+            DataContext = colorInfos;
         }
 
         ////this for binding maybe
@@ -109,11 +123,19 @@ namespace WpfApp2
                     shape.Effect = null;
                     selected.Remove(shape);
 
-                    if(selected.Count == 0)
+                    //properties of the current last one 
+                    if (selected.Count != 0)
+                    {
+                        var last = selected.Last();
+                        WidthText.Text = $"{last.Width}";
+                        HeightText.Text = $"{last.Height}";
+                    }
+                    else
                     {
                         Delete.IsEnabled = false;
                         RandomColor.IsEnabled = false;
                     }
+
                 }
                 else //if it wasnt selected then select it 
                 {
@@ -303,6 +325,7 @@ namespace WpfApp2
             }
         }
 
+
         private void ExportPNG_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
@@ -335,5 +358,19 @@ namespace WpfApp2
                 tr_rotate.CenterY = last.Height / 2;
             }      
         }
+
+        private void ColorsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (selected.Count != 0)
+            {
+                var last = selected.Last();
+                var comboItem = (ColorInfo)ColorsBox.SelectedItem;
+                last.Fill = new SolidColorBrush(Color.FromRgb(comboItem.Rgb.R, comboItem.Rgb.G, comboItem.Rgb.B));
+            }
+        }
+
+
+
+
     }
 }

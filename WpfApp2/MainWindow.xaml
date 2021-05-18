@@ -13,10 +13,10 @@
         Loaded="Window_Loaded" Width="1142">
 
     <Window.Resources>
-        <Style x:Key="labelStyle" TargetType="Label">
+        <Style x:Key="labelStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Height" Value="25"/>
-            <Setter Property="Width" Value="50"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="TextAlignment" Value="Right"/>
         </Style>
 
         <Style x:Key="textboxStyle" TargetType="TextBox">
@@ -44,6 +44,8 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <local:ColorToBrushConverter x:Key="colorsTobrush"/>
     </Window.Resources>
 
     <Grid>
@@ -65,25 +67,35 @@
                     <Button Name="DrawEllipse" Content="Ellipse"  Width="100" Height="50" Click="DrawEllipse_Click" Margin="5"/>
 
                     <StackPanel Margin="1" >
-                        <DockPanel>
-                            <Label Content="Width: "  Style="{StaticResource labelStyle}" />
+                        <DockPanel HorizontalAlignment="Right">
+                            <TextBlock Text="Width: "  Style="{StaticResource labelStyle}" />
                             <TextBox Name="WidthText"  Style="{StaticResource textboxStyle}" />
                         </DockPanel>
 
-                        <DockPanel>
-                            <Label Content="Height: " Style="{StaticResource labelStyle}" />
+                        <DockPanel HorizontalAlignment="Right">
+                            <TextBlock Text="Height: " Style="{StaticResource labelStyle}" />
                             <TextBox Name="HeightText" Style="{StaticResource textboxStyle}"/>
                         </DockPanel>
 
-                        <DockPanel>
-                            <Label Content="Color: "  Style="{StaticResource labelStyle}" Width="37" />
-                            <ComboBox Name="ColorsBox" Height="20" Width="110"/>
+                        <DockPanel HorizontalAlignment="Right">
+                            <TextBlock Text="Color: "  Style="{StaticResource labelStyle}" />
+                            <ComboBox Name="ColorsBox" Height="20" Width="110" ItemsSource="{Binding}" SelectionChanged="ColorsBox_SelectionChanged" >
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Name="colornames" Text="{Binding Name}" FontSize="12" Width="110" Height="20"
+                                                       TextAlignment="Center" Background="{Binding Rgb, Converter={StaticResource colorsTobrush}}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </DockPanel>
 
-                        <DockPanel>
-                            <Label Content="Angle: "  Style="{StaticResource labelStyle}" Width="44"/>
-                            <TextBox Text="{Binding ElementName=AngleSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" Height="20" Background="LightGray" TextAlignment="Center" FontSize="10"  Width="19" />
-                            <Slider Name="AngleSlider" Height="20" Width="110" ValueChanged="AngleSlider_ValueChanged" Minimum="-180" Maximum="180"/> 
+                        <DockPanel HorizontalAlignment="Right">
+                            <TextBlock Text="Angle: "  Style="{StaticResource labelStyle}" />
+                            <TextBlock Text="{Binding ElementName=AngleSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource labelStyle}" />
+                            <TextBlock Text="°"  Style="{StaticResource labelStyle}" />
+                            <Slider Name="AngleSlider" Height="20" Width="110" ValueChanged="AngleSlider_ValueChanged" Minimum="-180" Maximum="180" IsSnapToTickEnabled="True"/> 
                         </DockPanel>
                     </StackPanel>
 
