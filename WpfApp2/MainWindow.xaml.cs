@@ -129,14 +129,20 @@ namespace WpfApp2
 
         private void WidthText_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var last = selected.Last();
-            last.Width = Math.Abs(double.Parse(WidthText.Text));
+            if (selected.Count != 0)
+            {
+                var last = selected.Last();
+                last.Width = Math.Abs(double.Parse(WidthText.Text));
+            }        
         }
 
         private void HeightText_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var last = selected.Last();
-            last.Height = Math.Abs(double.Parse(HeightText.Text));
+            if (selected.Count != 0)
+            {
+                var last = selected.Last();
+                last.Height = Math.Abs(double.Parse(HeightText.Text));
+            }
         }
         private void ColorsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -172,7 +178,9 @@ namespace WpfApp2
                         WidthText.IsEnabled = false;
                         HeightText.IsEnabled = false;
                         ColorsBox.IsEnabled = false;
-                        
+                        WidthText.Text = " ";
+                        HeightText.Text = " ";
+
                         Delete.IsEnabled = false;
                         RandomColor.IsEnabled = false;
                     }
@@ -214,6 +222,8 @@ namespace WpfApp2
                 WidthText.IsEnabled = false;
                 HeightText.IsEnabled = false;
                 ColorsBox.IsEnabled = false;
+                WidthText.Text = " ";
+                HeightText.Text = " ";
 
                 Delete.IsEnabled = false;
                 RandomColor.IsEnabled = false;
@@ -429,8 +439,5 @@ namespace WpfApp2
                 tr_rotate.CenterY = last.Height / 2;
             }      
         }
-
-
-
     }
 }
